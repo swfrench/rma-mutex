@@ -13,13 +13,17 @@ int main(int argc, char **argv)
 
   rma_mutex_init(&m, MPI_COMM_WORLD, 0);
 
-  rma_mutex_lock(&m);
+  /* drop some ranks, in an effort to detect incorrect lock assignee
+   * indexing (which can be missed if all ranks contending for lock) */
+  if (m.rank % 3 != 0) {
+    rma_mutex_lock(&m);
 
-  printf("%3.3i has lock\n", m.rank); fflush(stdout);
+    printf("%3.3i has lock\n", m.rank); fflush(stdout);
 
-  printf("%3.3i about to release lock\n", m.rank); fflush(stdout);
+    printf("%3.3i about to release lock\n", m.rank); fflush(stdout);
 
-  rma_mutex_unlock(&m);
+    rma_mutex_unlock(&m);
+  }
 
   rma_mutex_free(&m);
   
