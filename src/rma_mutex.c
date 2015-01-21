@@ -161,14 +161,16 @@ static int next_rank(rma_mutex_t *m)
 {
   int i, j, next;
   next = m->rank;
-  for (i = 0, j = 0; i < m->size; i++)
-    if (i != m->rank) {
-      if (m->req_slice_buffer[j]) {
-        next = i;
-        break;
-      }
-      j += 1;
+  for (i = 0; i < m->size - 1; i++) {
+    j = (m->rank + i) % (m->size - 1);
+    if (m->req_slice_buffer[j]) {
+      if (j < m->rank)
+        next = j;
+      else
+        next = j + 1;
+      break;
     }
+  }
   return next;
 }
 
